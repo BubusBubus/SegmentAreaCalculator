@@ -18,7 +18,7 @@ public class MonteCarloForm : Form
 
     public MonteCarloForm()
     {
-        this.Text = "Методы Монте-Карло и мат.анализа для вычисления площади сегмента";
+        this.Text = "Методы Монте-Карло и мат.анализа для вычисления площади сегмента.  (version 0.1.7)";
         this.ClientSize = new Size(1000, 700);
         this.DoubleBuffered = true;
 
