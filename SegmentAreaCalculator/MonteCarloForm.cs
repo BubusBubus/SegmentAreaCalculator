@@ -14,27 +14,32 @@ public class MonteCarloForm : Form
     private NumericUpDown numTrials;
     private DBHelper dbHelper;
 
+    //параметры
     private double x0 = 2, y0 = -1, R = 2, C = -2;
 
     public MonteCarloForm()
     {
+        //настройки формы
         this.Text = "Методы Монте-Карло и мат.анализа для вычисления площади сегмента.  (version 0.1.7)";
         this.ClientSize = new Size(1000, 700);
         this.DoubleBuffered = true;
 
         dbHelper = new DBHelper("Data Source=MonteCarloResults.db");
+
+        //создаем элемент управления
         CreateControls();
     }
 
     private void CreateControls()
     {
+        //панель для параметров 
         Panel paramPanel = new Panel()
         {
             Dock = DockStyle.Left,
             Width = 250,
             BackColor = SystemColors.Control
         };
-
+        //параметры окружности
         GroupBox gbCircle = new GroupBox()
         {
             Text = "Параметры окружности",
@@ -56,6 +61,7 @@ public class MonteCarloForm : Form
 
         gbCircle.Controls.AddRange(new Control[] { lblX0, txtX0, lblY0, txtY0, lblRadius, txtRadius, lblC1, txtC });
 
+        //параметры для монтекарло
         Label lblTrials = new Label() { Text = "Точек Монте-Карло:", Location = new Point(10, 190), Width = 120 };
         numTrials = new NumericUpDown()
         {
@@ -67,6 +73,7 @@ public class MonteCarloForm : Form
             Width = 80
         };
 
+        //кнопка рассчета
         btnCalculate = new Button()
         {
             Text = "Вычислить площадь",
@@ -93,6 +100,7 @@ public class MonteCarloForm : Form
             BorderStyle = BorderStyle.FixedSingle
         };
 
+        //добавляем жлементы на панель
         paramPanel.Controls.AddRange(new Control[] { gbCircle, lblTrials, numTrials, btnCalculate, btnViewDatabase, lblResult });
 
         canvas = new PictureBox()
@@ -101,8 +109,12 @@ public class MonteCarloForm : Form
             BackColor = Color.White,
             BorderStyle = BorderStyle.FixedSingle
         };
+
+        //холст
         canvas.Paint += Canvas_Paint;
 
+
+        //панель и холст на форму
         this.Controls.Add(paramPanel);
         this.Controls.Add(canvas);
     }
@@ -124,9 +136,12 @@ public class MonteCarloForm : Form
             return;
         }
 
+        //- предидущие отчки 
         monteCarloPoints.Clear();
         canvas.Invalidate();
 
+
+        //считаем площади
         double exactArea = Math.PI * R * R;
         double mathArea = CalculateMathematicalArea(R, x0, y0, C);
         double monteCarloArea = CalculateMonteCarloArea((int)numTrials.Value);
@@ -138,12 +153,12 @@ public class MonteCarloForm : Form
                          $"Несовпадение: {error:F2}%";
 
         dbHelper.SaveResult(x0, y0, R, C, exactArea, mathArea, monteCarloArea, error);
-        canvas.Invalidate();
+        canvas.Invalidate();//обновление холста с новыми точками 
     }
 
     private double CalculateMonteCarloArea(int trials)
     {
-        monteCarloPoints.Clear();
+        monteCarloPoints.Clear();//- предидущие точки 
         float scale = GetScaleFactor();
         float centerX = canvas.Width / 2f;
         float centerY = canvas.Height / 2f;
@@ -159,15 +174,20 @@ public class MonteCarloForm : Form
 
         for (int i = 0; i < trials; i++)
         {
+            //случайная точка
             double x = xMin + rand.NextDouble() * (xMax - xMin);
             double y = yMin + rand.NextDouble() * (yMax - yMin);
 
+            //проверяем условия
             bool inCircle = Math.Pow(x - x0, 2) + Math.Pow(y - y0, 2) <= R * R;
             bool inLargeSegment = (C > y0) ? y < C : y > C;
             bool isHit = inCircle && inLargeSegment;
 
             if (isHit) hits++;
 
+
+
+            // Преобразуем координаты в экранные и сохраняем точку
             float screenX = centerX + (float)x * scale;
             float screenY = centerY - (float)y * scale;
             monteCarloPoints.Add((new PointF(screenX, screenY), isHit));
@@ -182,15 +202,16 @@ public class MonteCarloForm : Form
 
     private double CalculateMathematicalArea(double R, double x0, double y0, double C)
     {
+        // Вычисляем расстояние от центра до прямой
         double d = Math.Abs(y0 - C);
 
         if (d >= R)
         {
-            return Math.PI * R * R;
+            return Math.PI * R * R; // Прямая не пересекает окружность
         }
 
         double segmentArea = R * R * Math.Acos(d / R) - d * Math.Sqrt(R * R - d * d);
-        return Math.PI * R * R - segmentArea;
+        return Math.PI * R * R - segmentArea;  // Если прямая пересекает окружность, возвращаем площадь большого сегмента
     }
 
     private void Canvas_Paint(object sender, PaintEventArgs e)
@@ -199,45 +220,49 @@ public class MonteCarloForm : Form
         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
         g.Clear(Color.White);
 
+        // Масштабирование
         float scale = GetScaleFactor();
         float centerX = canvas.Width / 2;
         float centerY = canvas.Height / 2;
 
+        // Рисуем сетку
         Pen gridPen = new Pen(Color.LightGray, 1);
+
 
         float firstGridX = centerX % scale;
         for (float x = firstGridX; x < canvas.Width; x += scale)
         {
             g.DrawLine(gridPen, x, 0, x, canvas.Height);
-            if (Math.Abs(x - centerX) < 0.5f)
+            if (Math.Abs(x - centerX) < 0.5f)   // Выделяем ось Y жирнее
             {
                 g.DrawLine(Pens.Black, x, 0, x, canvas.Height);
             }
         }
 
-        float firstGridY = centerY % scale;
+        float firstGridY = centerY % scale; // Горизонтальные линии сетки
         for (float y = firstGridY; y < canvas.Height; y += scale)
         {
             g.DrawLine(gridPen, 0, y, canvas.Width, y);
-            if (Math.Abs(y - centerY) < 0.5f)
+            if (Math.Abs(y - centerY) < 0.5f)// Выделяем ось X жирнее
             {
                 g.DrawLine(Pens.Black, 0, y, canvas.Width, y);
             }
         }
 
+        // Окружность
         float circleX = centerX + (float)x0 * scale;
         float circleY = centerY - (float)y0 * scale;
         float diameter = (float)(2 * R) * scale;
         g.DrawEllipse(new Pen(Color.Blue, 2), circleX - diameter / 2, circleY - diameter / 2, diameter, diameter);
-
+        // Горизонтальная прямая (y = C)
         float lineY = centerY - (float)C * scale;
         g.DrawLine(new Pen(Color.Red, 2), 0, lineY, canvas.Width, lineY);
 
-        if (monteCarloPoints.Count > 0)
+        if (monteCarloPoints.Count > 0)  // Рисуем точки Монте-Карло (если есть)
         {
             float pointSize = Math.Max(2, 3f - (float)monteCarloPoints.Count / 5000);
 
-            foreach (var (point, isHit) in monteCarloPoints)
+            foreach (var (point, isHit) in monteCarloPoints)// Автомасштабирование
             {
                 using (var brush = new SolidBrush(isHit ? Color.Green : Color.Red))
                 {
