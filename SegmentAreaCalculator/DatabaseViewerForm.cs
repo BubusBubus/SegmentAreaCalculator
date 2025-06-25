@@ -6,8 +6,9 @@ using System.Data.SQLite;
 public class DatabaseViewerForm : Form
 {
     private DataGridView dataGridView;
-    private Button btnDelete, btnClearAll, btnClose;
+    private Button btnDelete, btnClearAll, btnClose, btnLoadSelected;
     private DBHelper dbHelper;
+    public event Action<double, double, double, double> DataSelected;
 
     public DatabaseViewerForm(DBHelper dbHelper)
     {
@@ -27,7 +28,8 @@ public class DatabaseViewerForm : Form
             Height = 500,
             ReadOnly = true,
             AllowUserToAddRows = false,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+            SelectionMode = DataGridViewSelectionMode.FullRowSelect
         };
 
         btnDelete = new Button
@@ -46,6 +48,15 @@ public class DatabaseViewerForm : Form
         };
         btnClearAll.Click += BtnClearAll_Click;
 
+        btnLoadSelected = new Button
+        {
+            Text = "Загрузить выбранное",
+            Dock = DockStyle.Left,
+            Width = 150,
+            BackColor = Color.LightBlue
+        };
+        btnLoadSelected.Click += BtnLoadSelected_Click;
+
         btnClose = new Button
         {
             Text = "Закрыть",
@@ -59,11 +70,31 @@ public class DatabaseViewerForm : Form
             Dock = DockStyle.Bottom,
             Height = 50
         };
-        buttonPanel.Controls.AddRange(new Control[] { btnDelete, btnClearAll, btnClose });
+        buttonPanel.Controls.AddRange(new Control[] { btnDelete, btnClearAll, btnLoadSelected, btnClose });
 
         this.Controls.Add(dataGridView);
         this.Controls.Add(buttonPanel);
     }
+
+    private void BtnLoadSelected_Click(object sender, EventArgs e)
+    {
+        if (dataGridView.SelectedRows.Count > 0)
+        {
+            var row = dataGridView.SelectedRows[0];
+            double x0 = Convert.ToDouble(row.Cells["X0"].Value);
+            double y0 = Convert.ToDouble(row.Cells["Y0"].Value);
+            double radius = Convert.ToDouble(row.Cells["Radius"].Value);
+            double c = Convert.ToDouble(row.Cells["C"].Value);
+
+            DataSelected?.Invoke(x0, y0, radius, c);
+            this.Close();
+        }
+        else
+        {
+            MessageBox.Show("Пожалуйста, выберите запись для загрузки.", "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+
 
     private void LoadData()
     {

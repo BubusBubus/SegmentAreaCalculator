@@ -20,7 +20,7 @@ public class MonteCarloForm : Form
     public MonteCarloForm()
     {
         //настройки формы
-        this.Text = "Методы Монте-Карло и мат.анализа для вычисления площади сегмента.  (version 0.1.7)";
+        this.Text = "Методы Монте-Карло и мат.анализа для вычисления площади сегмента.  (version 0.1.8)";
         this.ClientSize = new Size(1000, 700);
         this.DoubleBuffered = true;
 
@@ -122,6 +122,17 @@ public class MonteCarloForm : Form
     private void BtnViewDatabase_Click(object sender, EventArgs e)
     {
         var dbViewer = new DatabaseViewerForm(dbHelper);
+        dbViewer.DataSelected += (x0, y0, radius, c) =>
+        {
+            // Устанавливаем значения в текстовые поля
+            this.txtX0.Text = x0.ToString();
+            this.txtY0.Text = y0.ToString();
+            this.txtRadius.Text = radius.ToString();
+            this.txtC.Text = c.ToString();
+
+            // Вызываем расчет автоматически
+            this.BtnCalculate_Click(null, null);
+        };
         dbViewer.ShowDialog();
     }
 
