@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Data;
-
 using System.Data.SQLite;
 
-public class DBHelper
+
+namespace MonteCarloApp.Forms
 {
-    private readonly string _connectionString;
-
-    public DBHelper(string dbPath)
+    public class DBHelper
     {
-        _connectionString = $"Data Source={dbPath};Version=3;";
-        InitializeDatabase();
-    }
+        private readonly string _connectionString;
 
-    private void InitializeDatabase()
-    {
-        using (var connection = new SQLiteConnection(_connectionString))
+        public DBHelper(string dbPath)
         {
-            connection.Open();
+            _connectionString = $"Data Source={dbPath};Version=3;";
+            InitializeDatabase();
+        }
 
-            using (var command = new SQLiteCommand(connection))
+        private void InitializeDatabase()
+        {
+            using (var connection = new SQLiteConnection(_connectionString))
             {
-                command.CommandText = @"
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = @"
                     CREATE TABLE IF NOT EXISTS Results (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         X0 REAL NOT NULL,
@@ -32,88 +33,82 @@ public class DBHelper
                         MathArea REAL NOT NULL,
                         MonteCarloArea REAL NOT NULL,
                         ErrorPercent REAL NOT NULL,
+                        PointCount REAL NOT NULL,
                         CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
                     )";
-                command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
+                }
             }
         }
-    }
 
-    public void SaveResult(double x0, double y0, double radius, double c,
-                         double exactArea, double mathArea, double monteCarloArea, double errorPercent)
-    {
-        using (var connection = new SQLiteConnection(_connectionString))
+        public void SaveResult(double x0, double y0, double radius, double c,
+                             double exactArea, double mathArea, double monteCarloArea,
+                             double pointCount, double errorPercent)
         {
-            connection.Open();
-
-            using (var command = new SQLiteCommand(connection))
+            using (var connection = new SQLiteConnection(_connectionString))
             {
-                command.CommandText = @"
+                connection.Open();
+                using (var command = new SQLiteCommand(connection))
+                {
+                    command.CommandText = @"
                     INSERT INTO Results 
-                    (X0, Y0, Radius, C, ExactArea, MathArea, MonteCarloArea, ErrorPercent)
-                    VALUES (@x0, @y0, @radius, @c, @exactArea, @mathArea, @monteCarloArea, @errorPercent)";
+                    (X0, Y0, Radius, C, ExactArea, MathArea, 
+                     MonteCarloArea, PointCount, ErrorPercent)
+                    VALUES (@x0, @y0, @radius, @c, @exactArea, 
+                            @mathArea, @monteCarloArea, @pointCount, @errorPercent)";
 
-                command.Parameters.AddWithValue("@x0", x0);
-                command.Parameters.AddWithValue("@y0", y0);
-                command.Parameters.AddWithValue("@radius", radius);
-                command.Parameters.AddWithValue("@c", c);
-                command.Parameters.AddWithValue("@exactArea", exactArea);
-                command.Parameters.AddWithValue("@mathArea", mathArea);
-                command.Parameters.AddWithValue("@monteCarloArea", monteCarloArea);
-                command.Parameters.AddWithValue("@errorPercent", errorPercent);
+                    command.Parameters.AddWithValue("@x0", x0);
+                    command.Parameters.AddWithValue("@y0", y0);
+                    command.Parameters.AddWithValue("@radius", radius);
+                    command.Parameters.AddWithValue("@c", c);
+                    command.Parameters.AddWithValue("@exactArea", exactArea);
+                    command.Parameters.AddWithValue("@mathArea", mathArea);
+                    command.Parameters.AddWithValue("@monteCarloArea", monteCarloArea);
+                    command.Parameters.AddWithValue("@pointCount", pointCount);
+                    command.Parameters.AddWithValue("@errorPercent", errorPercent);
 
-                command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
+                }
             }
         }
-    }
 
-    public DataTable GetAllResults()
-    {
-        var dataTable = new DataTable();
-
-        using (var connection = new SQLiteConnection(_connectionString))
+        public DataTable GetAllResults()
         {
-            connection.Open();
-
-            using (var command = new SQLiteCommand(connection))
+            var dataTable = new DataTable();
+            using (var connection = new SQLiteConnection(_connectionString))
             {
-                command.CommandText = "SELECT * FROM Results ORDER BY CreatedAt DESC";
-
+                connection.Open();
+                using (var command = new SQLiteCommand("SELECT * FROM Results ORDER BY CreatedAt DESC", connection))
                 using (var adapter = new SQLiteDataAdapter(command))
                 {
                     adapter.Fill(dataTable);
                 }
             }
+            return dataTable;
         }
 
-        return dataTable;
-    }
-
-    public void DeleteResult(int id)
-    {
-        using (var connection = new SQLiteConnection(_connectionString))
+        public void DeleteResult(int id)
         {
-            connection.Open();
-
-            using (var command = new SQLiteCommand(connection))
+            using (var connection = new SQLiteConnection(_connectionString))
             {
-                command.CommandText = "DELETE FROM Results WHERE Id = @id";
-                command.Parameters.AddWithValue("@id", id);
-                command.ExecuteNonQuery();
+                connection.Open();
+                using (var command = new SQLiteCommand("DELETE FROM Results WHERE Id = @id", connection))
+                {
+                    command.Parameters.AddWithValue("@id", id);
+                    command.ExecuteNonQuery();
+                }
             }
         }
-    }
 
-    public void ClearAllResults()
-    {
-        using (var connection = new SQLiteConnection(_connectionString))
+        public void ClearAllResults()
         {
-            connection.Open();
-
-            using (var command = new SQLiteCommand(connection))
+            using (var connection = new SQLiteConnection(_connectionString))
             {
-                command.CommandText = "DELETE FROM Results";
-                command.ExecuteNonQuery();
+                connection.Open();
+                using (var command = new SQLiteCommand("DELETE FROM Results", connection))
+                {
+                    command.ExecuteNonQuery();
+                }
             }
         }
     }

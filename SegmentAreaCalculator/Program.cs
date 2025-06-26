@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MonteCarloApp.Forms;
+using System;
 using System.Windows.Forms;
 
 static class Program
