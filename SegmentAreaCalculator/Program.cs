@@ -46,16 +46,16 @@ public class MonteCarloForm : Form
         };
 
         Label lblX0 = new Label() { Text = "X центра:", Location = new Point(10, 25), Width = 70 };
-        txtX0 = new TextBox() { Text = "0", Location = new Point(90, 22), Width = 50 };
+        txtX0 = new TextBox() { Text = "-1", Location = new Point(90, 22), Width = 50 };
 
         Label lblY0 = new Label() { Text = "Y центра:", Location = new Point(10, 55), Width = 70 };
         txtY0 = new TextBox() { Text = "0", Location = new Point(90, 52), Width = 50 };
 
         Label lblRadius = new Label() { Text = "Радиус:", Location = new Point(10, 85), Width = 70 };
-        txtRadius = new TextBox() { Text = "0", Location = new Point(90, 82), Width = 50 };
+        txtRadius = new TextBox() { Text = "3", Location = new Point(90, 82), Width = 50 };
 
         Label lblC1 = new Label() { Text = "Горизонталь:", Location = new Point(10, 115), Width = 80 };
-        txtC = new TextBox() { Text = "0", Location = new Point(90, 112), Width = 50 };
+        txtC = new TextBox() { Text = "-1", Location = new Point(90, 112), Width = 50 };
 
         gbCircle.Controls.AddRange(new Control[] { lblX0, txtX0, lblY0, txtY0, lblRadius, txtRadius, lblC1, txtC });
 
