@@ -1,60 +1,119 @@
 ﻿using System;
+using System.Data;
+
 using System.Data.SQLite;
-using Microsoft.Data.Sqlite;
 
 public class DBHelper
 {
-    private string connectionString;
+    private readonly string _connectionString;
 
     public DBHelper(string dbPath)
     {
-        connectionString = $"Data Source={dbPath};Version=3;";
+        _connectionString = $"Data Source={dbPath};Version=3;";
         InitializeDatabase();
     }
 
     private void InitializeDatabase()
     {
-        using (var connection = new SqliteConnection(connectionString))
+        using (var connection = new SQLiteConnection(_connectionString))
         {
             connection.Open();
-            string tableCmd = @"CREATE TABLE IF NOT EXISTS Results (
-                                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                    X0 REAL,
-                                    Y0 REAL,
-                                    Radius REAL,
-                                    C REAL,
-                                    ExactArea REAL,
-                                    MathArea REAL,
-                                    MonteCarloArea REAL,
-                                    ErrorPercent REAL,
-                                    Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                                );";
-            using (var cmd = new SqliteCommand(tableCmd, connection))
+
+            using (var command = new SQLiteCommand(connection))
             {
-                cmd.ExecuteNonQuery();
+                command.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS Results (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        X0 REAL NOT NULL,
+                        Y0 REAL NOT NULL,
+                        Radius REAL NOT NULL,
+                        C REAL NOT NULL,
+                        ExactArea REAL NOT NULL,
+                        MathArea REAL NOT NULL,
+                        MonteCarloArea REAL NOT NULL,
+                        ErrorPercent REAL NOT NULL,
+                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                    )";
+                command.ExecuteNonQuery();
             }
         }
     }
 
-    public void SaveResult(double x0, double y0, double radius, double C,
-                           double exactArea, double mathArea, double monteCarloArea, double errorPercent)
+    public void SaveResult(double x0, double y0, double radius, double c,
+                         double exactArea, double mathArea, double monteCarloArea, double errorPercent)
     {
-        using (var connection = new SqliteConnection(connectionString))
+        using (var connection = new SQLiteConnection(_connectionString))
         {
             connection.Open();
-            string insertCmd = @"INSERT INTO Results (X0, Y0, Radius, C, ExactArea, MathArea, MonteCarloArea, ErrorPercent)
-                                 VALUES (@X0, @Y0, @Radius, @C, @ExactArea, @MathArea, @MonteCarloArea, @ErrorPercent);";
-            using (var cmd = new SqliteCommand(insertCmd, connection))
+
+            using (var command = new SQLiteCommand(connection))
             {
-                cmd.Parameters.AddWithValue("@X0", x0);
-                cmd.Parameters.AddWithValue("@Y0", y0);
-                cmd.Parameters.AddWithValue("@Radius", radius);
-                cmd.Parameters.AddWithValue("@C", C);
-                cmd.Parameters.AddWithValue("@ExactArea", exactArea);
-                cmd.Parameters.AddWithValue("@MathArea", mathArea);
-                cmd.Parameters.AddWithValue("@MonteCarloArea", monteCarloArea);
-                cmd.Parameters.AddWithValue("@ErrorPercent", errorPercent);
-                cmd.ExecuteNonQuery();
+                command.CommandText = @"
+                    INSERT INTO Results 
+                    (X0, Y0, Radius, C, ExactArea, MathArea, MonteCarloArea, ErrorPercent)
+                    VALUES (@x0, @y0, @radius, @c, @exactArea, @mathArea, @monteCarloArea, @errorPercent)";
+
+                command.Parameters.AddWithValue("@x0", x0);
+                command.Parameters.AddWithValue("@y0", y0);
+                command.Parameters.AddWithValue("@radius", radius);
+                command.Parameters.AddWithValue("@c", c);
+                command.Parameters.AddWithValue("@exactArea", exactArea);
+                command.Parameters.AddWithValue("@mathArea", mathArea);
+                command.Parameters.AddWithValue("@monteCarloArea", monteCarloArea);
+                command.Parameters.AddWithValue("@errorPercent", errorPercent);
+
+                command.ExecuteNonQuery();
+            }
+        }
+    }
+
+    public DataTable GetAllResults()
+    {
+        var dataTable = new DataTable();
+
+        using (var connection = new SQLiteConnection(_connectionString))
+        {
+            connection.Open();
+
+            using (var command = new SQLiteCommand(connection))
+            {
+                command.CommandText = "SELECT * FROM Results ORDER BY CreatedAt DESC";
+
+                using (var adapter = new SQLiteDataAdapter(command))
+                {
+                    adapter.Fill(dataTable);
+                }
+            }
+        }
+
+        return dataTable;
+    }
+
+    public void DeleteResult(int id)
+    {
+        using (var connection = new SQLiteConnection(_connectionString))
+        {
+            connection.Open();
+
+            using (var command = new SQLiteCommand(connection))
+            {
+                command.CommandText = "DELETE FROM Results WHERE Id = @id";
+                command.Parameters.AddWithValue("@id", id);
+                command.ExecuteNonQuery();
+            }
+        }
+    }
+
+    public void ClearAllResults()
+    {
+        using (var connection = new SQLiteConnection(_connectionString))
+        {
+            connection.Open();
+
+            using (var command = new SQLiteCommand(connection))
+            {
+                command.CommandText = "DELETE FROM Results";
+                command.ExecuteNonQuery();
             }
         }
     }
