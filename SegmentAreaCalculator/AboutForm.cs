@@ -59,10 +59,6 @@ namespace MonteCarloSegmentArea
             this.Controls.Add(titleLabel);
             this.Controls.Add(infoLabel);
             this.Controls.Add(closeButton);
-
-            // Иконка (опционально)
-            try { this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); }
-            catch { /* Игнорируем ошибки загрузки иконки */ }
         }
     }
 }

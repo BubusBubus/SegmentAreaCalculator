@@ -25,7 +25,7 @@ namespace MonteCarloApp.Forms
         public MonteCarloForm()
         {
             //настройки формы
-            this.Text = "Методы Монте-Карло и мат.анализа для вычисления площади сегмента.  (version 0.1.9)";
+            this.Text = "Вычисление площади сегмента окружности";
             this.ClientSize = new Size(1000, 700);
             this.DoubleBuffered = true;
 
@@ -120,14 +120,14 @@ namespace MonteCarloApp.Forms
 
             // Добавляем элементы на панель в правильном порядке
             paramPanel.Controls.AddRange(new Control[] {
-        gbCircle,
-        lblTrials,
-        numTrials,
-        btnCalculate,
-        btnViewDatabase,
-        btnAbout,    // Добавляем новую кнопку
-        lblResult    // Теперь lblResult инициализирован
-    });
+                gbCircle,
+                lblTrials,
+                numTrials,
+                btnCalculate,
+                btnViewDatabase,
+                btnAbout,    // Добавляем новую кнопку
+                lblResult    // Теперь lblResult инициализирован
+            });
 
             canvas = new PictureBox()
             {
