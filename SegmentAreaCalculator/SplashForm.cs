@@ -4,61 +4,51 @@ using System.Windows.Forms;
 
 namespace MonteCarloSegmentArea
 {
-    public class SplashForm : Form
+    public partial class SplashForm : Form
     {
-        // Удаляем вызов InitializeComponent(), так как мы его не используем
         public SplashForm()
         {
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.BackColor = Color.LightSteelBlue;
-            this.Size = new Size(900, 300);
+            this.FormBorderStyle = FormBorderStyle.None; // Убираем рамку
+            this.StartPosition = FormStartPosition.CenterScreen; // Центрируем на экране
+            this.BackColor = Color.AliceBlue; // Фоновый цвет
+            this.Size = new Size(900, 300); // Размер формы
+        }
 
-            // Создаем и настраиваем элементы управления
-            Label titleLabel = new Label
-            {
-                Text = "Вычисление площади сегмента окружности",
-                Font = new Font("Arial", 16, FontStyle.Bold),
-                ForeColor = Color.DarkBlue,
-                AutoSize = true,
-                Top = 30
-            };
-            titleLabel.Left = (this.Width - titleLabel.Width) / 2;
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
 
-            Label paramsLabel = new Label
-            {
-                Text = "           x0: -1,  y0: 0,  R: 3\n" +
-                "направление: горизонтально, C: -1",
-                Font = new Font("Arial", 12),
-                ForeColor = Color.DarkBlue,
-                AutoSize = true,
-                Top = 100,
-                TextAlign = ContentAlignment.MiddleCenter
-            };
-            paramsLabel.Left = (this.Width - paramsLabel.Width) / 2;
+            // Настройки шрифтов
+            Font titleFont = new Font("Arial", 24, FontStyle.Bold);
+            Font infoFont = new Font("Arial", 14);
+            Font authorFont = new Font("Arial", 18, FontStyle.Bold);
 
-            Label authorLabel = new Label
-            {
-                Text = "Автор: Дмитриев Тимур",
-                Font = new Font("Arial", 14, FontStyle.Bold),
-                ForeColor = Color.DarkBlue,
-                AutoSize = true,
-                Top = 200
-            };
-            authorLabel.Left = (this.Width - authorLabel.Width) / 2;
+            // Кисти для рисования
+            Brush textBrush = Brushes.YellowGreen;
+            Brush borderBrush = Brushes.DarkSeaGreen;
 
-            // Добавляем элементы на форму
-            this.Controls.Add(titleLabel);
-            this.Controls.Add(paramsLabel);
-            this.Controls.Add(authorLabel);
+            // Рисуем рамку вокруг формы
+            e.Graphics.DrawRectangle(new Pen(borderBrush, 5),
+                new Rectangle(0, 0, this.Width - 1, this.Height - 1));
 
-            // Рисуем рамку
-            this.Paint += (s, e) =>
-                e.Graphics.DrawRectangle(new Pen(Color.Navy, 5),
-                    new Rectangle(0, 0, this.Width - 1, this.Height - 1));
+            // Рисуем заголовок
+            string title = "Вычисление площади сегмента окружности";
+            SizeF titleSize = e.Graphics.MeasureString(title, titleFont);
+            e.Graphics.DrawString(title, titleFont, textBrush,
+                (this.Width - titleSize.Width) / 2, 30);
 
-            // Закрытие по клику (опционально)
-            this.Click += (s, e) => this.Close();
+            // Рисуем информацию о параметрах
+            string parameters = "               x0: -1,  y0: 0,  R: 3\n" +
+                               "направление: горизонтально, C: -1";
+            SizeF paramSize = e.Graphics.MeasureString(parameters, infoFont);
+            e.Graphics.DrawString(parameters, infoFont, textBrush,
+                (this.Width - paramSize.Width) / 2, 100);
+
+            // Рисуем информацию об авторе
+            string author = "Автор: Дмитриев Тимур";
+            SizeF authorSize = e.Graphics.MeasureString(author, authorFont);
+            e.Graphics.DrawString(author, authorFont, textBrush,
+                (this.Width - authorSize.Width) / 2, 200);
         }
     }
 }

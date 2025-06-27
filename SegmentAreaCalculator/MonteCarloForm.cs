@@ -1,8 +1,9 @@
-﻿using System;
+﻿using MonteCarloSegmentArea;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Data;
 
 
 namespace MonteCarloApp.Forms
@@ -16,6 +17,7 @@ namespace MonteCarloApp.Forms
         private PictureBox canvas;
         private NumericUpDown numTrials;
         private DBHelper dbHelper;
+        private Button btnAbout;
 
         //параметры
         private double x0 = 2, y0 = -1, R = 2, C = -2;
@@ -35,14 +37,15 @@ namespace MonteCarloApp.Forms
 
         private void CreateControls()
         {
-            //панель для параметров 
+            // Панель для параметров 
             Panel paramPanel = new Panel()
             {
                 Dock = DockStyle.Left,
                 Width = 250,
                 BackColor = SystemColors.Control
             };
-            //параметры окружности
+
+            // Параметры окружности (без изменений)
             GroupBox gbCircle = new GroupBox()
             {
                 Text = "Параметры окружности",
@@ -64,7 +67,7 @@ namespace MonteCarloApp.Forms
 
             gbCircle.Controls.AddRange(new Control[] { lblX0, txtX0, lblY0, txtY0, lblRadius, txtRadius, lblC1, txtC });
 
-            //параметры для монтекарло
+            // Параметры для Монте-Карло (без изменений)
             Label lblTrials = new Label() { Text = "Точек Монте-Карло:", Location = new Point(10, 190), Width = 120 };
             numTrials = new NumericUpDown()
             {
@@ -76,7 +79,7 @@ namespace MonteCarloApp.Forms
                 Width = 80
             };
 
-            //кнопка рассчета
+            // Кнопка рассчета (без изменений)
             btnCalculate = new Button()
             {
                 Text = "Вычислить площадь",
@@ -86,6 +89,7 @@ namespace MonteCarloApp.Forms
             };
             btnCalculate.Click += BtnCalculate_Click;
 
+            // Кнопка просмотра БД (без изменений)
             btnViewDatabase = new Button()
             {
                 Text = "Просмотр базы данных",
@@ -95,16 +99,35 @@ namespace MonteCarloApp.Forms
             };
             btnViewDatabase.Click += BtnViewDatabase_Click;
 
+            // Сначала инициализируем lblResult
             lblResult = new Label()
             {
-                Location = new Point(10, 330),
-                Size = new Size(230, 200),
+                Location = new Point(10, 380), // Теперь это значение будет использоваться
+                Size = new Size(230, 150),
                 Font = new Font("Arial", 10),
                 BorderStyle = BorderStyle.FixedSingle
             };
 
-            //добавляем жлементы на панель
-            paramPanel.Controls.AddRange(new Control[] { gbCircle, lblTrials, numTrials, btnCalculate, btnViewDatabase, lblResult });
+            // Теперь добавляем кнопку "О программе" (после инициализации lblResult)
+            btnAbout = new Button()
+            {
+                Text = "О программе",
+                Location = new Point(10, 330), // Размещаем между btnViewDatabase и lblResult
+                Size = new Size(150, 40),
+                BackColor = Color.LightGoldenrodYellow
+            };
+            btnAbout.Click += BtnAbout_Click;
+
+            // Добавляем элементы на панель в правильном порядке
+            paramPanel.Controls.AddRange(new Control[] {
+        gbCircle,
+        lblTrials,
+        numTrials,
+        btnCalculate,
+        btnViewDatabase,
+        btnAbout,    // Добавляем новую кнопку
+        lblResult    // Теперь lblResult инициализирован
+    });
 
             canvas = new PictureBox()
             {
@@ -112,12 +135,9 @@ namespace MonteCarloApp.Forms
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-
-            //холст
             canvas.Paint += Canvas_Paint;
 
-
-            //панель и холст на форму
+            // Добавляем панель и холст на форму
             this.Controls.Add(paramPanel);
             this.Controls.Add(canvas);
         }
@@ -284,6 +304,11 @@ namespace MonteCarloApp.Forms
                     }
                 }
             }
+        }
+        private void BtnAbout_Click(object sender, EventArgs e)
+        {
+            AboutForm aboutForm = new AboutForm();
+            aboutForm.ShowDialog(this);
         }
     }
 }
