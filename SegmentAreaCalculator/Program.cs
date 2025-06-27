@@ -9,6 +9,13 @@ static class Program
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+
+        // Показываем Splash Screen
+        using (var splash = new SplashScreenForm())
+        {
+            splash.ShowDialog();
+        }
+
         Application.Run(new MonteCarloForm());
     }
 }

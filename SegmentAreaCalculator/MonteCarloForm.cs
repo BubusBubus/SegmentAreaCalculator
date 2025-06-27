@@ -35,14 +35,28 @@ namespace MonteCarloApp.Forms
 
         private void CreateControls()
         {
-            //панель для параметров 
+            // Создаем кнопку "О программе" (в виде ссылки)
+            LinkLabel lblAbout = new LinkLabel()
+            {
+                Text = "О программе",
+                Location = new Point(this.ClientSize.Width - 100, 10),
+                AutoSize = true,
+                LinkColor = Color.Blue,
+                VisitedLinkColor = Color.Blue,
+                ActiveLinkColor = Color.DarkBlue,
+                Font = new Font("Arial", 9, FontStyle.Underline)
+            };
+            lblAbout.LinkClicked += (sender, e) => ShowAboutDialog();
+
+            // Панель для параметров
             Panel paramPanel = new Panel()
             {
                 Dock = DockStyle.Left,
                 Width = 250,
                 BackColor = SystemColors.Control
             };
-            //параметры окружности
+
+            // Параметры окружности
             GroupBox gbCircle = new GroupBox()
             {
                 Text = "Параметры окружности",
@@ -64,7 +78,7 @@ namespace MonteCarloApp.Forms
 
             gbCircle.Controls.AddRange(new Control[] { lblX0, txtX0, lblY0, txtY0, lblRadius, txtRadius, lblC1, txtC });
 
-            //параметры для монтекарло
+            // Параметры для Монте-Карло
             Label lblTrials = new Label() { Text = "Точек Монте-Карло:", Location = new Point(10, 190), Width = 120 };
             numTrials = new NumericUpDown()
             {
@@ -76,7 +90,7 @@ namespace MonteCarloApp.Forms
                 Width = 80
             };
 
-            //кнопка рассчета
+            // Кнопка рассчета
             btnCalculate = new Button()
             {
                 Text = "Вычислить площадь",
@@ -86,6 +100,7 @@ namespace MonteCarloApp.Forms
             };
             btnCalculate.Click += BtnCalculate_Click;
 
+            // Кнопка просмотра БД
             btnViewDatabase = new Button()
             {
                 Text = "Просмотр базы данных",
@@ -95,6 +110,7 @@ namespace MonteCarloApp.Forms
             };
             btnViewDatabase.Click += BtnViewDatabase_Click;
 
+            // Результаты
             lblResult = new Label()
             {
                 Location = new Point(10, 330),
@@ -103,23 +119,65 @@ namespace MonteCarloApp.Forms
                 BorderStyle = BorderStyle.FixedSingle
             };
 
-            //добавляем жлементы на панель
+            // Добавляем элементы на панель
             paramPanel.Controls.AddRange(new Control[] { gbCircle, lblTrials, numTrials, btnCalculate, btnViewDatabase, lblResult });
 
+            // Холст для рисования
             canvas = new PictureBox()
             {
                 Dock = DockStyle.Fill,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle
             };
-
-            //холст
             canvas.Paint += Canvas_Paint;
 
-
-            //панель и холст на форму
+            // Добавляем элементы на форму
+            this.Controls.Add(lblAbout); // Добавляем ссылку "О программе" первой
             this.Controls.Add(paramPanel);
             this.Controls.Add(canvas);
+        }
+
+        private void ShowAboutDialog()
+        {
+            Form aboutForm = new Form()
+            {
+                Text = "О программе",
+                Size = new Size(450, 300),
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition = FormStartPosition.CenterParent,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                ShowIcon = false
+            };
+
+            string aboutText = @"Методы Монте-Карло и математического анализа
+                                 для вычисления площади сегмента окружности
+
+                                 Версия: 0.1.9
+
+                                 Функционал:
+                                 - Вычисление площади аналитическим методом
+                                 - Оценка площади методом Монте-Карло
+                                 - Визуализация точек на графике
+                                 - Сохранение результатов в базу данных
+
+                                 Разработчик: Лапин А.А.
+                                 Дата сборки: " + DateTime.Now.ToString("yyyy-MM-dd");
+
+            TextBox txtAbout = new TextBox()
+            {
+                Text = aboutText,
+                Multiline = true,
+                ReadOnly = true,
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Arial", 10),
+                BackColor = SystemColors.Control,
+                ScrollBars = ScrollBars.Vertical
+            };
+
+            aboutForm.Controls.Add(txtAbout);
+            aboutForm.ShowDialog(this);
         }
 
         private void BtnViewDatabase_Click(object sender, EventArgs e)
